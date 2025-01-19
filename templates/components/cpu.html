@@ -1,0 +1,10 @@
+{% for cpu in cpus %}
+
+
+<h4 class="small font-weight-bold">{{ cpu.hostname }} <span class="float-right">{{ cpu.percentage }}%</span></h4>
+<div class="progress mb-4">
+    <div class="progress-bar bg-info" role="progressbar" style='width: {{ cpu.percentage }}%'
+        aria-valuenow="{{ cpu.percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
+</div>
+
+{% endfor %}

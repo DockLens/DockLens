@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Docker Monitor{% endblock %}
+
+{% block styles %}
+<link href="{{ url_for('static', path='vendor/datatables/dataTables.bootstrap4.min.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<!-- Begin Page Content -->
+<div class="container-fluid">
+    <!-- Page Heading -->
+    <h1 class="h3 mb-2 text-gray-800">Data Containers</h1>
+
+    <!-- DataTales Example -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Containers Status</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Hostname</th>
+                            <th>Name</th>
+                            <th>Status</th>
+                            <th>Last Updated</th>
+                        </tr>
+                    </thead>
+                    <tbody hx-get="/api/containers/status" hx-trigger="every 2s" hx-swap="innerHTML" hx-trigger="load"
+                        id="containers">
+                        <td>loading...</td>
+                        <td>loading...</td>
+                        <td>loading...</td>
+                        <td>loading...</td>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+<!-- /.container-fluid -->
+
+{% endblock %}
+
+{% block scripts %}
+<!-- Page level plugins -->
+<script src="{{ url_for('static', path='vendor/datatables/jquery.dataTables.min.js') }}"></script>
+<script src="{{ url_for('static', path='vendor/datatables/dataTables.bootstrap4.min.js') }}"></script>
+<!-- Page level custom scripts -->
+<script src="{{ url_for('static', path='js/demo/datatables-demo.js') }}"></script>
+{% endblock %}

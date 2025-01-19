@@ -1,0 +1,13 @@
+<!-- Tabel ini akan di-update oleh htmx -->
+{% for container in containers %}
+<tr>
+    <td>{{ container.hostname }}</td>
+    <td>{{ container.name }}</td>
+    <td>
+        <span
+            class="{% if container.status == 'running' %}badge badge-success{% else %}badge badge-danger{% endif %}">{{
+            container.status }}</span>
+    </td>
+    <td>{{ container.last_updated }}</td>
+</tr>
+{% endfor %}
