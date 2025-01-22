@@ -5,8 +5,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from typing import List
 from ...config.database import SessionLocal
-from ...models import cpu_model as models
-from ...schemas import cpu_schema as schemas
+from ...models import hosts_model as models
+from ...schemas import hosts_schema as schemas
 from ...utils.telegram_notifier import send_notification
 import psutil
 
@@ -20,74 +20,90 @@ async def get_db():
         yield session
 
 
-@router.post("/cpu", response_model=schemas.Cpu)
-async def create_or_update_Cpu(
-    cpu: schemas.CpuCreate, db: AsyncSession = Depends(get_db)
+@router.post("/cpu", response_model=schemas.Host)
+async def create_or_update_host(
+    host: schemas.HostCreate, db: AsyncSession = Depends(get_db)
 ):
     # Coba untuk mendapatkan CPU berdasarkan hostname
     result = await db.execute(
-        select(models.Cpu)
-        .where(models.Cpu.hostname == cpu.hostname)
+        select(models.Host)
+        .where(models.Host.hostname == host.hostname)
         .execution_options(synchronize_session="fetch")
     )
-    db_cpu = result.scalar_one_or_none()
+    hosts = result.scalar_one_or_none()
 
     try:
-        cpu.percentage = float(cpu.percentage)
+        host.cpu_usage = float(host.cpu_usage)
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid percentage value")
 
-    if db_cpu:
-        # Jika CPU melebihi 90%, kirimkan notifikasi
-        if cpu.percentage > 90:
-            if db_cpu.notification_sent:
-                # Jika notifikasi sudah dikirim, jangan kirim lagi
+    if hosts:
+        if host.cpu_usage > 90:
+            if hosts.notification_sent:
                 pass
             else:
-                await send_notification(f"CPU di {db_cpu.hostname} melebihi 90%.")
-                db_cpu.notification_sent = True  # Tandai notifikasi sudah dikirim
+                await send_notification(f"CPU di {host.hostname} melebihi 90%.")
 
-        # Jika CPU turun di bawah 90%, kirimkan notifikasi sekali
-        elif cpu.percentage < 90:
-            if not db_cpu.notification_sent:
+        elif host.cpu_usage < 90:
+            if not hosts.notification_sent:
                 await send_notification(
-                    f"CPU di {db_cpu.hostname} telah turun di bawah 90%. Sekarang: {cpu.percentage}%"
+                    f"CPU di {host.hostname} telah turun di bawah 90%. Sekarang: {host.cpu_usage}%"
                 )
-                db_cpu.notification_sent = True  # Tandai notifikasi sudah dikirim
+                hosts.notification_sent = True
 
-        db_cpu.percentage = cpu.percentage
+        hosts.cpu_usage = host.cpu_usage
+        hosts.ram_total = host.ram_total
+        hosts.ram_usage = host.ram_usage
+        hosts.disk_total = host.disk_total
+        hosts.disk_usage = host.disk_usage
+
     else:
-        new_cpu = models.Cpu(
-            hostname=cpu.hostname,
-            percentage=cpu.percentage,
-            notification_sent=False,  # Saat pertama kali, notifikasi belum dikirim
+        new_host = models.Host(
+            hostname=host.hostname,
+            cpu_usage=host.cpu_usage,
+            ram_total=host.ram_total,
+            ram_usage=host.ram_usage,
+            disk_total=host.disk_total,
+            disk_usage=host.disk_usage,
+            notification_sent=False,
         )
-        db.add(new_cpu)
-        db_cpu = new_cpu
+        db.add(new_host)
+        hosts = new_host
 
     await db.commit()
-    await db.refresh(db_cpu)
+    await db.refresh(hosts)
 
-    print(f"hostname: {cpu.hostname}, percentage: {cpu.percentage}")
+    print(f"hostname: {host.hostname}, percentage: {host.cpu_usage}")
 
-    return db_cpu
+    return hosts
 
 
 @router.get("/cpu", response_class=HTMLResponse)
 async def get_cpus_table(request: Request, db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(models.Cpu))
-    cpus = result.scalars().all()  # Perbaikan pada penamaan variabel
+    result = await db.execute(select(models.Host))
+    cpus = result.scalars().all()
     return templates.TemplateResponse(
         request=request,
-        name="components/cpu.html",  # Menggunakan 'filename' alih-alih 'name'
+        name="components/cpu.html",
         context={"cpus": cpus},
+    )
+
+
+@router.get("/agent", response_class=HTMLResponse)
+async def get_cpus_table(request: Request, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(models.Host))
+    hosts = result.scalars().all()
+    return templates.TemplateResponse(
+        request=request,
+        name="components/agents/table.html",
+        context={"hosts": hosts},
     )
 
 
 @router.get("/cpu/bar", response_class=HTMLResponse)
 async def get_cpus_table(request: Request, db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(models.Cpu))
-    cpus = result.scalars().all()  # Perbaikan pada penamaan variabel
-    # get cpu percentage
+    result = await db.execute(select(models.Host))
+    cpus = result.scalars().all()
+
     percentage = cpus[0].percentage
     return f'<div class="progress-bar bg-info" role="progressbar" style="width: {percentage}%" aria-valuenow="{percentage}" aria-valuemin="0" aria-valuemax="100"></div>'

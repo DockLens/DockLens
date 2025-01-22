@@ -11,7 +11,7 @@ Base = declarative_base()
 
 async def init_db():
     import app.models.containers_model
-    import app.models.cpu_model
+    import app.models.hosts_model
 
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)

@@ -4,27 +4,43 @@ import requests
 import hashlib
 from ..config import API_URL
 
-hostname_id = socket.gethostname()
 
 URL = f"{API_URL}/hosts/cpu"
 
 
-# Fungsi untuk mengambil informasi kontainer dari Docker
-def get_cpu_percentage():
-    cpu_percentage = psutil.cpu_percent()
-    hsn = hostname_id
+def get_system_info():
+    hostname = socket.gethostname()
+    cpu_usage = psutil.cpu_percent()
 
-    cpu_info = {"hostname": hsn, "percentage": cpu_percentage}
+    # RAM information
+    ram_total = psutil.virtual_memory().total
+    ram_total_gb = int(ram_total / (1024**2))  # Convert to GB and remove decimal
+    ram_usage = psutil.virtual_memory().used
+    ram_usage_gb = int(ram_usage / (1024**2))  # Convert to GB and remove decimal
 
-    return cpu_info
+    # Disk information
+    disk_total = psutil.disk_usage("/").total
+    disk_total_gb = int(disk_total / (1024**3))  # Convert to GB and remove decimal
+    disk_usage = psutil.disk_usage("/").used
+    disk_usage_gb = int(disk_usage / (1024**3))  # Convert to GB and remove decimal
+
+    host_info = {
+        "hostname": hostname,
+        "cpu_usage": cpu_usage,
+        "ram_total": ram_total_gb,
+        "ram_usage": ram_usage_gb,
+        "disk_total": disk_total_gb,
+        "disk_usage": disk_usage_gb,
+    }
+
+    return host_info
 
 
-# Fungsi untuk mengirim data ke API
-def send_data(cpu_info):
+def send_data(host_info):
     try:
-        response = requests.post(URL, json=cpu_info)
+        response = requests.post(URL, json=host_info)
         response.raise_for_status()
-        print(f"Data sent for CPU: {cpu_info['percentage']}")
+        print(f"Data info system sent for host: {host_info['hostname']}")
 
     except requests.RequestException as e:
-        print(f"Failed to send data for CPU: {e}")
+        print(f"Failed to send data for host: {e}")

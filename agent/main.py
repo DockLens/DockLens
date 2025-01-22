@@ -1,31 +1,33 @@
 from fastapi import FastAPI, BackgroundTasks
 from .modules.containers import get_containers_info, send_data as send_containers_data
-from .modules.hosts import get_cpu_percentage, send_data as send_cpu_data
+from .modules.hosts import get_system_info, send_data as send_host_data
 import time
 from .config import INTERVAL
 from threading import Thread
 
 app = FastAPI()
 
+# read file version.txt
+with open("version.txt", "r") as f:
+    version = f.read()
 
-# Fungsi background task untuk mengirim data setiap interval
+
 def periodic_task():
     while True:
-        containers = get_containers_info()  # Ambil informasi kontainer
-        cpu = get_cpu_percentage()  # Ambil persentase CPU
+        containers = get_containers_info()
+        hosts = get_system_info()
         send_containers_data(containers)
-        send_cpu_data(cpu)
-        time.sleep(INTERVAL)  # Tunggu sebelum mengirim data lagi
+        send_host_data(hosts)
+        time.sleep(INTERVAL)
 
 
-# Endpoint untuk memulai background task pada saat startup
 @app.on_event("startup")
 async def start_background_task():
     task_thread = Thread(target=periodic_task)
-    task_thread.daemon = True  # Menandakan thread ini akan mati bersama aplikasi
+    task_thread.daemon = True
     task_thread.start()
 
 
 @app.get("/")
 async def root():
-    return {"message": "Docker Monitoring API"}
+    return {"message": "Agent Docker Monitoring API", "version": version}
