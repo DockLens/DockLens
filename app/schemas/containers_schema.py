@@ -8,6 +8,7 @@ class ContainerBase(BaseModel):
     hostname: str
     name: str
     status: str
+    notification_sent: Optional[bool] = False
 
 
 class ContainerCreate(ContainerBase):

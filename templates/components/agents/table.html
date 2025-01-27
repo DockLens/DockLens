@@ -1,0 +1,17 @@
+<!-- Tabel ini akan di-update oleh htmx -->
+{% for host in hosts %}
+<tr>
+    <td>{{ host.hostname }}</td>
+    <td>
+        <div class="progress mb-4">
+            <div class="progress-bar bg-info" role="progressbar" style='width: {{ host.cpu_usage }}%'
+                aria-valuenow="{{ host_cpu_udage }}" aria-valuemin="0" aria-valuemax="100"> {{ host.cpu_usage }}%</div>
+        </div>
+    </td>
+    <td>{{ host.ram_total }} (MB)</td>
+    <td>{{ host.ram_usage }} (MB)</td>
+    <td>{{ host.disk_total }} (GB)</td>
+    <td>{{ host.disk_usage }} (GB)</td>
+    <td>{{ host.last_updated }}</td>
+</tr>
+{% endfor %}

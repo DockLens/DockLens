@@ -2,6 +2,10 @@
 
 {% block title %}Dashboard - Docker Monitor{% endblock %}
 
+{% block styles %}
+<link href="{{ url_for('static', path='vendor/datatables/dataTables.bootstrap4.min.css') }}" rel="stylesheet">
+{% endblock %}
+
 {% block content %}
 
 <!-- Begin Page Content -->
@@ -10,8 +14,8 @@
     <!-- Page Heading -->
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
-        <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
-                class="fas fa-download fa-sm text-white-50"></i> Generate Report</a>
+        <!-- <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
+                class="fas fa-download fa-sm text-white-50"></i> Generate Report</a> -->
     </div>
 
     <!-- Content Row -->
@@ -92,9 +96,47 @@
 
     <div class="row">
         <!-- Content Column -->
-        <div class="col-lg-6 mb-4">
+        <div class="col-lg-12 mb-12">
 
             <!-- Project Card Example -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Agent Status</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Hostname</th>
+                                    <th>CPU Usage</th>
+                                    <th>Ram Total</th>
+                                    <th>Ram Usage</th>
+                                    <th>Disk Total</th>
+                                    <th>Disk Usage</th>
+                                    <th>Last Update</th>
+                                </tr>
+                            </thead>
+                            <tbody hx-get="/api/hosts/agent" hx-trigger="every 2s" hx-swap="innerHTML" hx-trigger="load"
+                                id="containers">
+                                <td>loading...</td>
+                                <td>loading...</td>
+                                <td>loading...</td>
+                                <td>loading...</td>
+                                <td>loading...</td>
+                                <td>loading...</td>
+                                <td>loading...</td>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- <div class="row">
+        <div class="col-lg-6 mb-4">
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
                     <h6 class="m-0 font-weight-bold text-primary">CPU Agent</h6>
@@ -106,14 +148,11 @@
 
         </div>
 
-        <!-- Pie Chart -->
         <div class="col-lg-6 mb-4">
             <div class="card shadow mb-4">
-                <!-- Card Header - Dropdown -->
                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                     <h6 class="m-0 font-weight-bold text-primary">Chart</h6>
                 </div>
-                <!-- Card Body -->
                 <div class="card-body">
                     <div id="data-container" data-exited="{{ containers_exited }}"
                         data-running="{{ containers_running }}">
@@ -132,7 +171,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> -->
 
 
 </div>
@@ -142,6 +181,12 @@
 {% endblock %}
 
 {% block scripts %}
+<!-- Page level plugins -->
+<script src="{{ url_for('static', path='vendor/datatables/jquery.dataTables.min.js') }}"></script>
+<script src="{{ url_for('static', path='vendor/datatables/dataTables.bootstrap4.min.js') }}"></script>
+<!-- Page level custom scripts -->
+<script src="{{ url_for('static', path='js/demo/datatables-demo.js') }}"></script>
+
 <!-- Page level plugins -->
 <script src="{{ url_for('static', path='vendor/chart.js/Chart.min.js') }}"></script>
 

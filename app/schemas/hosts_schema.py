@@ -3,21 +3,25 @@ from datetime import datetime
 from typing import Optional
 
 
-class CpuBase(BaseModel):
+class HostBase(BaseModel):
     hostname: str
-    percentage: str
+    cpu_usage: str
+    ram_total: str
+    ram_usage: str
+    disk_total: str
+    disk_usage: str
     notification_sent: Optional[bool] = False
 
 
-class CpuCreate(CpuBase):
+class HostCreate(HostBase):
     pass
 
 
-class CpuUpdate(CpuBase):
+class HostUpdate(HostBase):
     pass
 
 
-class Cpu(CpuBase):
+class Host(HostBase):
     id: int
     last_updated: datetime
 
